@@ -3,7 +3,7 @@ import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, StyleSheet }
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { SetStateAction, useState } from 'react';
+import { useState } from 'react';
 
 
 export default function Practice() {
@@ -76,11 +76,16 @@ export default function Practice() {
       </ThemedView>
       <View style={styles.container}>
       <View style={styles.textContainer}>
-        {words.map((word, index) => (
+        {words.map((word, index) => {
+          if (word.match(/\p{Script=Han}/u)) {
+          return (
           <Pressable key={index} onPress={() => handleWordPress(word)}>
             <Text style={styles.word}>{word}</Text>
           </Pressable>
-        ))}
+        )} else {
+          return (<Text key={index} style={styles.word}>{word}</Text>)
+        }
+      })}     
       </View>
       <Modal
         animationType="slide"
