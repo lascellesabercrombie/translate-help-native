@@ -1,17 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useState } from 'react';
-
+import TooltipModal from '@/components/TooltipModal';
 
 export default function Practice() {
 
   const [selectedWord, setSelectedWord] = useState('');
   const [definitions, setDefinitions] = useState<string[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // TODO: allow user to select text
   const text = '你好，世界！';
 
   const fetchDefinition = async (word: string) => {
@@ -58,12 +61,20 @@ export default function Practice() {
     }
   };
 
-  const handleWordPress = (word: string) => {
+
+  const handleWordPress = (word: string, event: GestureResponderEvent) => {
+    const { pageX, pageY } = event.nativeEvent;
     setSelectedWord(word);
     setDefinitions([]);
-    setModalVisible(true);
+    setIsModalVisible(true);
     fetchDefinition(word);
+    setTooltipPosition({ x: pageX, y: pageY });
   };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedWord('');
+  }
 
   const words = text.split('');
 
@@ -79,38 +90,22 @@ export default function Practice() {
         {words.map((word, index) => {
           if (word.match(/\p{Script=Han}/u)) {
           return (
-          <Pressable key={index} onPress={() => handleWordPress(word)}>
-            <Text style={styles.word}>{word}</Text>
+          <Pressable key={index} onPress={(event) => handleWordPress(word, event)}>
+            <ThemedText type="default">{word}</ThemedText>
           </Pressable>
         )} else {
-          return (<Text key={index} style={styles.word}>{word}</Text>)
+          return (<ThemedText key={index} style={styles.word}>{word}</ThemedText>)
         }
       })}     
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.selectedWord}>{selectedWord}</Text>
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-              <FlatList
-                data={definitions}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Text style={styles.definition}>{item}</Text>}
-              />
-            )}
-            <Pressable onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+          <TooltipModal
+          visible={isModalVisible}
+          onClose={handleCloseModal}
+          selectedWord={selectedWord}
+          definitions={definitions}
+          loading={loading}
+          position={tooltipPosition}
+        />
     </View>
     </ParallaxScrollView>
   );
@@ -128,50 +123,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  container: {
+    padding: 10,
   },
-
-container: {
-  padding: 10,
-},
-textContainer: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-},
-word: {
-  fontSize: 18,
-  marginRight: 5,
-},
-modalContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  backgroundColor: 'rgba(0,0,0,0.5)',
-},
-modalContent: {
-  backgroundColor: 'white',
-  padding: 20,
-  borderRadius: 10,
-  width: '80%',
-  maxHeight: '80%',
-},
-selectedWord: {
-  fontSize: 24,
-  fontWeight: 'bold',
-  marginBottom: 10,
-},
-definition: {
-  fontSize: 16,
-  marginBottom: 5,
-},
-closeButton: {
-  marginTop: 20,
-  alignSelf: 'flex-end',
-},
-closeButtonText: {
-  color: 'blue',
-  fontSize: 18,
-},
+  textContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  word: {
+    fontSize: 18,
+    marginRight: 5,
+  },
 });
