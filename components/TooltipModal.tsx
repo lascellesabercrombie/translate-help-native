@@ -1,5 +1,5 @@
 import { Modal, View, Text, Pressable, ActivityIndicator, FlatList, StyleSheet, Dimensions } from 'react-native';
-
+import { ThemedText } from './ThemedText';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const LINE_HEIGHT = 20;
@@ -41,14 +41,14 @@ export default function TooltipModal ({
             {/* // heavily truncated tooltip (both horizontally and vertically
             hidden text shown by ellipsis); on double click expand to show full 
             definitions */}
-            <Text style={styles.selectedWord}>{selectedWord}</Text>
+            <ThemedText type="selectedWord">{selectedWord}</ThemedText>
             {loading ? (
               <ActivityIndicator size="small" color="#0000ff" />
             ) : (
               <FlatList
                 data={definitions}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Text style={styles.definition} numberOfLines={1}>{item}</Text>}
+                renderItem={({ item }) => <ThemedText type="definition" numberOfLines={1}>{item}</ThemedText>}
               />
             )}
           </View>
@@ -82,13 +82,4 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  selectedWord: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  definition: {
-    fontSize: 14,
-    marginBottom: 4,
-},
 });
