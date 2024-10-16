@@ -5,7 +5,17 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from 'expo-router';
 
-export const texts = [
+export type TextType = {
+  id: number;
+  originalTitle: string;
+  translatedTitle: string;
+  authorFamilyName: string;
+  authorPersonalName: string;
+  originalText: string;
+  userTranslations: string[];
+};
+
+export const texts: TextType[] = [
   {
     id: 1,
     originalTitle: "静夜思",
@@ -33,7 +43,7 @@ export const texts = [
     originalText: `鹅、鹅、鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波`,
     userTranslations: []
   },
-]
+];
 
 export default function Library() {
   // const [loading, setLoading] = useState(false);
