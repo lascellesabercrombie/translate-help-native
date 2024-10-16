@@ -24,9 +24,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="library"
+        name="texts/[id]"
         options={{
-          title: 'Library',
+          title: 'Text',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'book' : 'book-outline'} color={color} />
           ),
