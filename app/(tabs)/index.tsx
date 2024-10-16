@@ -1,112 +1,85 @@
-import { Ionicons } from '@expo/vector-icons';
-import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
-import TooltipModal from '@/components/TooltipModal';
+import { Link } from 'expo-router';
 
-export default function Practice() {
+export const texts = [
+  {
+    id: 1,
+    originalTitle: "静夜思",
+    translatedTitle: "Quiet Night Thoughts",
+    authorFamilyName: "Li",
+    authorPersonalName: "Bai",
+    originalText: `床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。`,
+    userTranslations: []
+  },
+  {
+    id: 2,
+    originalTitle: "悯农",
+    translatedTitle: "Peasants",
+    authorFamilyName: "Li",
+    authorPersonalName: "Shen",
+    originalText: `锄禾日当午，\n汗滴禾下土。\n谁知盘中餐，\n粒粒皆辛苦。`,
+    userTranslations: []
+  },
+  {
+    id: 3,
+    originalTitle: "咏鹅",
+    translatedTitle: "To the Goose",
+    authorFamilyName: "Luo",
+    authorPersonalName: "Binwang",
+    originalText: `鹅、鹅、鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波`,
+    userTranslations: []
+  },
+]
 
-  const [selectedWord, setSelectedWord] = useState('');
-  const [definitions, setDefinitions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  // TODO: allow user to select text
-  const text = '你好，世界！';
-
-  const fetchDefinition = async (word: string) => {
-    setLoading(true);
-    try {
-      const apiUrl = `https://en.wiktionary.org/w/api.php?action=parse&format=json&prop=wikitext&page=${encodeURIComponent(word)}&origin=*`;
-      
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      if (data.parse && data.parse.wikitext) {
-        const wikitext = data.parse.wikitext['*'];
-        const sections = wikitext.split("==Chinese==")[1];
-        const chineseSection = sections.split(/\n==[\w]+==\n/)[0]
-        if (chineseSection) {
-          const definitionsSection = chineseSection.split('===Definitions===')[1];
-          if (definitionsSection) {
-            const definitionsMatch = definitionsSection.match(/# .+/g);
-            if (definitionsMatch) {
-              const parsedDefinitions = definitionsMatch.map((def: string) => {
-                return def.replace(/^# /, '')
-                          .replace(/\[\[/g, '')
-                          .replace(/\]\]/g, '')
-                          .replace(/\{\{.+?\}\}/g, '')
-                          .trim();
-              });
-              setDefinitions(parsedDefinitions);
-            } else {
-              setDefinitions(['No definitions found.']);
-            }
-          } else {
-            setDefinitions(['No Definitions section found.']);
-          }
-        } else {
-          setDefinitions(['No Chinese section found.']);
-        }
-      } else {
-        setDefinitions(['No definition data found.']);
-      }
-    } catch (error) {
-      console.error('Error fetching definition:', error);
-      setDefinitions(['Error fetching definition']);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const handleWordPress = (word: string, event: GestureResponderEvent) => {
-    const { pageX, pageY } = event.nativeEvent;
-    setSelectedWord(word);
-    setDefinitions([]);
-    setIsModalVisible(true);
-    fetchDefinition(word);
-    setTooltipPosition({ x: pageX, y: pageY });
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    setSelectedWord('');
-  }
-
-  const words = text.split('');
-
+export default function Library() {
+  // const [loading, setLoading] = useState(false);
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={<Ionicons size={310} name="language" style={styles.headerImage} />}>
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={<Ionicons size={310} name="book" style={styles.headerImage} />}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Practice</ThemedText>
+        <ThemedText type="title">Library</ThemedText>
       </ThemedView>
-      <View style={styles.container}>
-      <View style={styles.textContainer}>
-        {words.map((word, index) => {
-          if (word.match(/\p{Script=Han}/u)) {
-          return (
-          <Pressable key={index} onPress={(event) => handleWordPress(word, event)}>
-            <ThemedText type="default">{word}</ThemedText>
-          </Pressable>
-        )} else {
-          return (<ThemedText key={index} style={styles.word}>{word}</ThemedText>)
-        }
-      })}     
-      </View>
-          <TooltipModal
-          visible={isModalVisible}
-          onClose={handleCloseModal}
-          selectedWord={selectedWord}
-          definitions={definitions}
-          loading={loading}
-          position={tooltipPosition}
-        />
-    </View>
+        <Pressable>
+            <ThemedText type="subtitle">
+              Add New Text
+            </ThemedText>
+        </Pressable>
+  
+            <ThemedText type="subtitle">
+              Select Text
+            </ThemedText>
+            {/* {loading ? (
+              <ActivityIndicator size="small" color="#0000ff" />
+            ) : ( */}
+              <FlatList
+                data={texts}
+                keyExtractor={(item, id) => id.toString()}
+                renderItem={({ item }) => 
+                <Link  href={{
+                  pathname: '/texts/[id]',
+                  params: { id: item.id },
+                }}>
+                  <ThemedText numberOfLines={1}>{item.authorFamilyName} {item.authorPersonalName}</ThemedText>
+                  <ThemedText numberOfLines={1}>{item.originalTitle}</ThemedText>
+                </Link>}
+              />
+            {/* )} */}
+        {/* <ThemedText type="subtitle">Input Text</ThemedText>
+        <TextInput
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+          placeholder="Type here"></TextInput>
+          <ThemedText type="subtitle">Or</ThemedText>
+          <Pressable>
+            <ThemedText type="subtitle">
+              Upload
+            </ThemedText>
+          </Pressable> */}
+
     </ParallaxScrollView>
   );
 }
@@ -120,18 +93,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
-  },
-  container: {
-    padding: 10,
-  },
-  textContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  word: {
-    fontSize: 18,
-    marginRight: 5,
   },
 });
