@@ -37,8 +37,8 @@ export default function Library() {
                   pathname: '/texts/[id]',
                   params: { id: item.id },
                 }}>
-                  <ThemedText numberOfLines={1}>{item.authorFamilyName} {item.authorPersonalName}</ThemedText>
-                  <ThemedText numberOfLines={1}>{item.originalTitle}</ThemedText>
+                  <ThemedText numberOfLines={1}>{item.original.authorFamilyName} {item.original.authorPersonalName}</ThemedText>
+                  <ThemedText numberOfLines={1}>{item.original.title}</ThemedText>
                 </Link>}
               />
             {/* )} */}

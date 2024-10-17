@@ -80,14 +80,14 @@ export default function Text() {
   }
 
   const text = texts?.find((text) => id === text.id.toString());
-  const words = text?.originalText.split('');
+  const words = text?.original.text.split('');
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={<Ionicons size={310} name="language" style={styles.headerImage} />}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">{text?.originalTitle}</ThemedText>
+        <ThemedText type="title">{text?.original.title}</ThemedText>
       </ThemedView>
       <View style={styles.container}>
     <View style={styles.textContainer}>

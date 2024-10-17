@@ -9,12 +9,18 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 export interface TextType {
   id: number;
-  originalTitle: string;
-  translatedTitle: string;
+  original: {
+  title: string;
   authorFamilyName: string;
-  authorPersonalName: string;
-  originalText: string;
-  userTranslations: string[];
+  authorPersonalName?: string;
+  text: string;
+  };
+  translation: {
+    title?: string;
+    authorFamilyName?: string;
+    authorPersonalName?: string;
+    text?: string;
+  }
 };
 
 interface TextContextType {
@@ -30,32 +36,50 @@ export default function RootLayout() {
   const [texts, setTexts] = useState<TextType[]>([
     {
       id: 1,
-      originalTitle: "静夜思",
-      translatedTitle: "Quiet Night Thoughts",
-      authorFamilyName: "Li",
-      authorPersonalName: "Bai",
-      originalText: `床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。`,
-      userTranslations: []
+      original: {
+        title: "静夜思",
+        authorFamilyName: "李",
+        authorPersonalName: "白",
+        text: `床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。`,
+      },
+      translation: {
+        title: "Quiet Night Thoughts",
+        authorFamilyName: "Li",
+        authorPersonalName: "Bai",
+        text: "",
+      },
     },
     {
       id: 2,
-      originalTitle: "悯农",
-      translatedTitle: "Peasants",
-      authorFamilyName: "Li",
-      authorPersonalName: "Shen",
-      originalText: `锄禾日当午，\n汗滴禾下土。\n谁知盘中餐，\n粒粒皆辛苦。`,
-      userTranslations: []
+      original: {
+        title: "悯农",
+        authorFamilyName: "李",
+        authorPersonalName: "绅",
+        text: `锄禾日当午，\n汗滴禾下土。\n谁知盘中餐，\n粒粒皆辛苦。`,
+      },
+      translation: {
+        title: "Peasants",
+        authorFamilyName: "Li",
+        authorPersonalName: "Shen",
+        text: "",
+      },
     },
     {
       id: 3,
-      originalTitle: "咏鹅",
-      translatedTitle: "To the Goose",
-      authorFamilyName: "Luo",
-      authorPersonalName: "Binwang",
-      originalText: `鹅、鹅、鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波`,
-      userTranslations: []
+      original: {
+        title: "咏鹅",
+        authorFamilyName: "骆",
+        authorPersonalName: "宾王",
+        text: `鹅、鹅、鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波`,
+      },
+      translation: {
+        title: "To the Goose",
+        authorFamilyName: "Luo",
+        authorPersonalName: "Binwang",
+        text: "",
+      },
     },
-  ])
+  ]);
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),

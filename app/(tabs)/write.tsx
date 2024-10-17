@@ -34,7 +34,7 @@ export default function Write() {
           <ThemedText type="title">Write</ThemedText>
         </ThemedView>
         {texts ? <Pressable onPress={handlePress}>
-          <Text>{selectedText?.originalTitle}</Text>
+          <Text>{selectedText?.original.title}</Text>
           <Modal visible={dropdownVisible} transparent={true} animationType="fade">
             <View style={styles.modalContainer}>
               <FlatList
@@ -42,7 +42,7 @@ export default function Write() {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                   <Pressable onPress={() => handleSelect(item)} style={styles.dropdownItem}>
-                    <ThemedText>{item.originalTitle}</ThemedText>
+                    <ThemedText>{item.original.title}</ThemedText>
                   </Pressable>
                 )}
               />
