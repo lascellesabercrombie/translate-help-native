@@ -1,5 +1,5 @@
 {
-  "name": "hanzi-native",
+  "name": "translate-help-native",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
