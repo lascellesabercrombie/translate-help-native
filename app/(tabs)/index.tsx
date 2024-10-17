@@ -4,49 +4,12 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from 'expo-router';
-
-export type TextType = {
-  id: number;
-  originalTitle: string;
-  translatedTitle: string;
-  authorFamilyName: string;
-  authorPersonalName: string;
-  originalText: string;
-  userTranslations: string[];
-};
-
-export const texts: TextType[] = [
-  {
-    id: 1,
-    originalTitle: "静夜思",
-    translatedTitle: "Quiet Night Thoughts",
-    authorFamilyName: "Li",
-    authorPersonalName: "Bai",
-    originalText: `床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。`,
-    userTranslations: []
-  },
-  {
-    id: 2,
-    originalTitle: "悯农",
-    translatedTitle: "Peasants",
-    authorFamilyName: "Li",
-    authorPersonalName: "Shen",
-    originalText: `锄禾日当午，\n汗滴禾下土。\n谁知盘中餐，\n粒粒皆辛苦。`,
-    userTranslations: []
-  },
-  {
-    id: 3,
-    originalTitle: "咏鹅",
-    translatedTitle: "To the Goose",
-    authorFamilyName: "Luo",
-    authorPersonalName: "Binwang",
-    originalText: `鹅、鹅、鹅，\n曲项向天歌。\n白毛浮绿水，\n红掌拨清波`,
-    userTranslations: []
-  },
-];
+import { useContext } from 'react';
+import { TextContext } from '@/app/_layout'
 
 export default function Library() {
-  // const [loading, setLoading] = useState(false);
+  const textContext = useContext(TextContext);
+  const texts = textContext?.texts;
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}

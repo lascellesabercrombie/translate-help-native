@@ -3,13 +3,15 @@ import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { texts } from '../index';
+import { TextContext } from '@/app/_layout';
 
 export default function Text() {
     const {id} = useLocalSearchParams();
+    const textContext = useContext(TextContext);
+    const texts = textContext?.texts;
 
   const [selectedWord, setSelectedWord] = useState('');
   const [definitions, setDefinitions] = useState<string[]>([]);
@@ -77,7 +79,7 @@ export default function Text() {
     setSelectedWord('');
   }
 
-  const text = texts.find((text) => id === text.id.toString());
+  const text = texts?.find((text) => id === text.id.toString());
   const words = text?.originalText.split('');
 
   return (
