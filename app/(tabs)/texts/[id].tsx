@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { TextContext } from '@/app/_layout';
@@ -13,15 +13,17 @@ export default function Text() {
     const textContext = useContext(TextContext);
     const texts = textContext?.texts;
 
-  const [selectedWord, setSelectedWord] = useState('');
   const [definitions, setDefinitions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const [selectedCharacters, setSelectedCharacters] = useState<Array<[number, string]>>([]);
+  const [isLongPress, setIsLongPress] = useState(false);
+  const [selectedWord, setSelectedWord] = useState('');
   
   const fetchDefinition = async (word: string) => {
     setLoading(true);
+    //TODO: better handling of multi-character words
     try {
       const apiUrl = `https://en.wiktionary.org/w/api.php?action=parse&format=json&prop=wikitext&page=${encodeURIComponent(word)}&origin=*`;
       
@@ -64,10 +66,8 @@ export default function Text() {
     }
   };
 
-
-  const handleWordPress = (word: string, event: GestureResponderEvent) => {
+  const handleWordPressOut = (word: string, event: GestureResponderEvent) => {
     const { pageX, pageY } = event.nativeEvent;
-    setSelectedWord(word);
     setDefinitions([]);
     setIsModalVisible(true);
     fetchDefinition(word);
@@ -75,7 +75,9 @@ export default function Text() {
   };
 
   const handleCloseModal = () => {
+    setIsLongPress(false);
     setIsModalVisible(false);
+    setSelectedCharacters([]);
     setSelectedWord('');
   }
 
@@ -93,10 +95,38 @@ export default function Text() {
     <View style={styles.textContainer}>
       {words ? words.map((word, index) => {
         if (word === '\n') {
-          return <View key={index} style={{ width: '100%', height: 0 }} />;
+          return <View key={index} style={{ width: '100%', height: 0 }}></View>;
         } else if (word.match(/\p{Script=Han}/u)) {
           return (
-            <Pressable key={index} onPress={(event) => handleWordPress(word, event)}>
+            <Pressable key={index}
+            onPressOut={
+              //TODO: styling for long-press selection
+              //TODO: handle user clicking elsewhere to cancel selection
+              //
+              (event) => {
+                // definition for a single character
+                if (!isLongPress) {
+                  setSelectedWord(word);
+                  handleWordPressOut(word, event)
+                }
+                else {
+                  if (selectedCharacters.length === 0) {
+                    setSelectedCharacters([[index, word]]);
+                  }
+                  else if (selectedCharacters?.length > 0 && index === selectedCharacters?.[0]?.[0]) {
+                    setIsLongPress(false);
+                  }
+                  // definition for a multi-character word
+                  else {
+                    let multiCharacterWord = words.slice(selectedCharacters?.[0][0], index + 1).join('');
+                    setSelectedWord(multiCharacterWord);
+                    handleWordPressOut(multiCharacterWord, event)
+                  }
+                }
+              }
+            }
+              onLongPress={
+                () => {setIsLongPress(true)}}>
               <ThemedText type="default">{word}</ThemedText>
             </Pressable>
           );
