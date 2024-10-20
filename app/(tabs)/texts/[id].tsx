@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { TextContext } from '@/app/_layout';
@@ -21,6 +21,20 @@ export default function Text() {
   const [isLongPress, setIsLongPress] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   
+function parseDefinitions(definitionsSection: string) {
+  const definitionsMatch = definitionsSection.match(/# .+/g);
+  if (definitionsMatch) {
+    const parsedDefinitions = definitionsMatch.map((def: string) => {
+      return def.replace(/^# /, '')
+                .replace(/\[\[/g, '')
+                .replace(/\]\]/g, '')
+                .replace(/\{\{.+?\}\}/g, '')
+                .trim();
+  });
+  return parsedDefinitions;
+  }
+}
+
   const fetchDefinition = async (word: string) => {
     setLoading(true);
     //TODO: better handling of multi-character words
@@ -31,27 +45,22 @@ export default function Text() {
       const data = await response.json();
       if (data.parse && data.parse.wikitext) {
         const wikitext = data.parse.wikitext['*'];
+        // take the entry text after ==Chinese== and before any other language sections
         const sections = wikitext.split("==Chinese==")[1];
         const chineseSection = sections.split(/\n==[\w]+==\n/)[0]
         if (chineseSection) {
+          // it looks like single characters get a definition section, while multi-character words get a part of speech section. Current set-up not exhaustive and doesn't properly cover cases (which may exist) where there are multiple parts of speech headings.
           const definitionsSection = chineseSection.split('===Definitions===')[1];
-          if (definitionsSection) {
-            const definitionsMatch = definitionsSection.match(/# .+/g);
-            if (definitionsMatch) {
-              const parsedDefinitions = definitionsMatch.map((def: string) => {
-                return def.replace(/^# /, '')
-                          .replace(/\[\[/g, '')
-                          .replace(/\]\]/g, '')
-                          .replace(/\{\{.+?\}\}/g, '')
-                          .trim();
-              });
+          const nounSection = chineseSection.split('===Noun===')[1];
+          const verbSection = chineseSection.split('===Verb===')[1];
+          const idiomSection = chineseSection.split('===Idiom===')[1];
+          const textToParse = definitionsSection || nounSection || verbSection || idiomSection;
+          if (textToParse) {
+              const parsedDefinitions = parseDefinitions(textToParse) || [];
               setDefinitions(parsedDefinitions);
             } else {
               setDefinitions(['No definitions found.']);
             }
-          } else {
-            setDefinitions(['No Definitions section found.']);
-          }
         } else {
           setDefinitions(['No Chinese section found.']);
         }
