@@ -7,6 +7,7 @@ import { useContext, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { TextContext } from '@/app/_layout';
+import { parseDefinitions } from '@/helpers/parseDefinitions';
 
 export default function Text() {
     const {id} = useLocalSearchParams();
@@ -21,20 +22,6 @@ export default function Text() {
   const [isLongPress, setIsLongPress] = useState(false);
   const [selectedWord, setSelectedWord] = useState('');
   
-function parseDefinitions(definitionsSection: string) {
-  const definitionsMatch = definitionsSection.match(/# .+/g);
-  if (definitionsMatch) {
-    const parsedDefinitions = definitionsMatch.map((def: string) => {
-      return def.replace(/^# /, '')
-                .replace(/\[\[/g, '')
-                .replace(/\]\]/g, '')
-                .replace(/\{\{.+?\}\}/g, '')
-                .trim();
-  });
-  return parsedDefinitions;
-  }
-}
-
   const fetchDefinition = async (word: string) => {
     setLoading(true);
     //TODO: better handling of multi-character words
