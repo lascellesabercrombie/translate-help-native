@@ -3,7 +3,7 @@ import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useContext, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { TextContext } from '@/app/_layout';
@@ -80,6 +80,23 @@ export default function Text() {
   const text = texts?.find((text) => id === text.id.toString());
   const words = text?.original.text.split('');
 
+  function isCharacterSelected (index: number) {
+    const isSelected = selectedCharacters.some(([firstElement]) => {
+      return firstElement === index;
+    });
+    return isSelected;
+  };
+
+  const isCharacterInRange = useCallback((index: number) => {
+    if (selectedCharacters.length !== 2) return false;
+    //TODO: handle case where user selects characters in reverse order
+    const [start, end] = [
+      selectedCharacters[0][0],
+      selectedCharacters[1][0]
+    ]
+    return index >= start && index <= end;
+  }, [selectedCharacters]);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -95,6 +112,10 @@ export default function Text() {
         } else if (word.match(/\p{Script=Han}/u)) {
           return (
             <Pressable key={index}
+            style={[
+              isCharacterSelected(index) && styles.selectedButton,
+              isCharacterInRange(index) && styles.rangeSelectedButton,
+            ]}
             onPressOut={
               //TODO: styling for long-press selection
               //TODO: handle user clicking elsewhere to cancel selection
@@ -102,6 +123,7 @@ export default function Text() {
               (event) => {
                 // definition for a single character
                 if (!isLongPress) {
+                  setSelectedCharacters([[index, word]]);
                   setSelectedWord(word);
                   handleWordPressOut(word, event)
                 }
@@ -114,7 +136,9 @@ export default function Text() {
                   }
                   // definition for a multi-character word
                   else {
+                    //TODO: handle case where user selects characters in reverse order
                     let multiCharacterWord = words.slice(selectedCharacters?.[0][0], index + 1).join('');
+                    setSelectedCharacters([...selectedCharacters, [index, word]]);
                     setSelectedWord(multiCharacterWord);
                     handleWordPressOut(multiCharacterWord, event)
                   }
@@ -159,6 +183,14 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 10,
+  },
+  rangeSelectedButton: {
+    backgroundColor: '#69A1FF',
+    borderColor: '#0056B3',
+  },
+  selectedButton: {
+    backgroundColor: '#007AFF',
+    borderColor: '#0056B3',
   },
   textContainer: {
     flexDirection: 'row',
