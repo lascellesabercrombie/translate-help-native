@@ -4,16 +4,33 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Link } from 'expo-router';
-import { useContext } from 'react';
-import { TextContext } from '@/app/_layout'
+import { useSQLiteContext } from 'expo-sqlite';
+import { useEffect, useState } from 'react';
 
 export default function Library() {
-  const textContext = useContext(TextContext);
-  const texts = textContext?.texts;
+  const db = useSQLiteContext();
+
+  const [texts, setTexts] = useState<{ id: number; family_name: string; personal_name: string; title: string }[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const allRows = await db.getAllAsync<{ id: number; family_name: string; personal_name: string; title: string }>(
+        'SELECT texts.id, family_name, personal_name, title FROM authors JOIN texts ON authors.id = texts.author_id;');
+      setTexts(allRows);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    console.log('texts', texts);
+  }, [texts]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={<Ionicons size={310} name="book" style={styles.headerImage} />}>
+    <>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+        headerImage={<Ionicons size={310} name="book" style={styles.headerImage} />}>
+      </ParallaxScrollView>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Library</ThemedText>
       </ThemedView>
@@ -26,6 +43,7 @@ export default function Library() {
             <ThemedText type="subtitle">
               Select Text
             </ThemedText>
+
             {/* {loading ? (
               <ActivityIndicator size="small" color="#0000ff" />
             ) : ( */}
@@ -37,10 +55,11 @@ export default function Library() {
                   pathname: '/texts/[id]',
                   params: { id: item.id },
                 }}>
-                  <ThemedText numberOfLines={1}>{item.original.authorFamilyName} {item.original.authorPersonalName}</ThemedText>
-                  <ThemedText numberOfLines={1}>{item.original.title}</ThemedText>
+                  <ThemedText numberOfLines={1}>{item.family_name} {item.personal_name}</ThemedText>
+                  <ThemedText numberOfLines={1}>{item.title}</ThemedText>
                 </Link>}
               />
+              
             {/* )} */}
         {/* <ThemedText type="subtitle">Input Text</ThemedText>
         <TextInput
@@ -53,7 +72,7 @@ export default function Library() {
             </ThemedText>
           </Pressable> */}
 
-    </ParallaxScrollView>
+</>
   );
 }
 
