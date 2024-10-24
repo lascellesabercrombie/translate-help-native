@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   definition: {
+    color: 'black',
     fontSize: 14,
     marginBottom: 4,
   },
@@ -55,6 +56,7 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   selectedWord: {
+      color: 'black',
       fontSize: 18,
       fontWeight: 'bold',
       marginBottom: 8,
