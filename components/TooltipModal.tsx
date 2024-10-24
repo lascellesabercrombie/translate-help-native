@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, ActivityIndicator, FlatList, StyleSheet, Dimensions } from 'react-native';
+import { Modal, View, Pressable, ActivityIndicator, FlatList, StyleSheet, Dimensions } from 'react-native';
 import { ThemedText } from './ThemedText';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -47,7 +47,7 @@ export default function TooltipModal ({
             ) : (
               <FlatList
                 data={definitions}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={index => index.toString()}
                 renderItem={({ item }) => <ThemedText type="definition" numberOfLines={1}>{item}</ThemedText>}
               />
             )}
