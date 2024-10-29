@@ -3,16 +3,49 @@ import { View, Pressable, StyleSheet, GestureResponderEvent } from 'react-native
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import TooltipModal from '@/components/TooltipModal';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { TextContext } from '@/app/_layout';
 import { parseDefinitions } from '@/helpers/parseDefinitions';
+import { useSQLiteContext } from 'expo-sqlite';
+import { TextContext } from '@/app/_layout';
+import { Text as TextType } from '@/types/data';
 
 export default function Text() {
-    const {id} = useLocalSearchParams();
-    const textContext = useContext(TextContext);
-    const texts = textContext?.texts;
+  const { id } = useLocalSearchParams();
+  if (typeof id !== 'string') {
+    throw new Error('Invalid id');
+  }
+  const textContext = useContext(TextContext);
+  const db = useSQLiteContext();
+
+  const [text, setText] = useState<TextType | null>(null);
+  const [words, setWords] = useState<string[]>([]);
+  
+  const setSelectedTextId = textContext?.setSelectedTextId;
+
+
+useEffect(() => {
+  const fetchData = async () => {
+    const allRows: TextType | null = await db.getFirstAsync(
+      'SELECT * FROM texts WHERE texts.id = ?;', [parseInt(id)]);
+    if (allRows) {
+      setText(allRows);
+      setWords(allRows.text?.split(''));
+    } else {
+      console.error('No text found');
+    }
+    
+  };
+  fetchData();
+}, []);
+
+useEffect(() => {
+  if (id && setSelectedTextId) {
+    setSelectedTextId(parseInt(id));
+  }
+}, [id]
+);
 
   const [definitions, setDefinitions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,6 +58,7 @@ export default function Text() {
   const fetchDefinition = async (word: string) => {
     setLoading(true);
     //TODO: better handling of multi-character words
+    //TODO: it seems like simplified characters are not being parsed correctly. Consider redirecting in those cases to the traditional character page and presenting definition from there.
     try {
       const apiUrl = `https://en.wiktionary.org/w/api.php?action=parse&format=json&prop=wikitext&page=${encodeURIComponent(word)}&origin=*`;
       
@@ -77,8 +111,8 @@ export default function Text() {
     setSelectedWord('');
   }
 
-  const text = texts?.find((text) => id === text.id.toString());
-  const words = text?.original.text.split('');
+  // const text = texts?.find((text) => id === text.id.toString());
+  
 
   function isCharacterSelected (index: number) {
     const isSelected = selectedCharacters.some(([firstElement]) => {
@@ -102,7 +136,7 @@ export default function Text() {
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={<Ionicons size={310} name="language" style={styles.headerImage} />}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">{text?.original.title}</ThemedText>
+        <ThemedText type="title">{text?.title}</ThemedText>
       </ThemedView>
       <View style={styles.container}>
     <View style={styles.textContainer}>
@@ -146,7 +180,9 @@ export default function Text() {
               }
             }
               onLongPress={
-                () => {setIsLongPress(true)}}>
+                () => {
+                  //TODO: styling for long-press selection
+                  setIsLongPress(true)}}>
               <ThemedText type="default">{word}</ThemedText>
             </Pressable>
           );
