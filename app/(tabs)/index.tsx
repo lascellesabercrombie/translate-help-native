@@ -3,27 +3,36 @@ import { FlatList, Pressable, StyleSheet } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { IndexAuthorTextJoin } from '@/types/data';
+import { TextContext } from '../_layout';
+
 
 export default function Library() {
   const db = useSQLiteContext();
+  const setSelectedTextId = useContext(TextContext)?.setSelectedTextId;
 
-  const [texts, setTexts] = useState<{ id: number; family_name: string; personal_name: string; title: string }[]>([]);
+  const [texts, setTexts] = useState<IndexAuthorTextJoin[]>([]);
 
   useEffect(() => {
+    let mounted = true;
+    
     const fetchData = async () => {
-      const allRows = await db.getAllAsync<{ id: number; family_name: string; personal_name: string; title: string }>(
+      const allRows = await db.getAllAsync<IndexAuthorTextJoin>(
         'SELECT texts.id, family_name, personal_name, title FROM authors JOIN texts ON authors.id = texts.author_id;');
-      setTexts(allRows);
+      if (mounted) {
+        setTexts(allRows);
+      }
     };
+    
     fetchData();
-  }, []);
 
-  useEffect(() => {
-    console.log('texts', texts);
-  }, [texts]);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <>
@@ -51,13 +60,24 @@ export default function Library() {
                 data={texts}
                 keyExtractor={(item, id) => id.toString()}
                 renderItem={({ item }) => 
-                <Link  href={{
+                <Pressable onPress={() => {
+                    if (setSelectedTextId) {
+                      setSelectedTextId(item.id); 
+                    } else {
+                      console.error("setSelectedTextId not found in context");
+                    }
+                }}>
+                <Link  
+                href={{
                   pathname: '/texts/[id]',
                   params: { id: item.id },
-                }}>
+                }}
+                >
                   <ThemedText numberOfLines={1}>{item.family_name} {item.personal_name}</ThemedText>
                   <ThemedText numberOfLines={1}>{item.title}</ThemedText>
-                </Link>}
+                </Link>
+                </Pressable>
+                }
               />
               
             {/* )} */}
