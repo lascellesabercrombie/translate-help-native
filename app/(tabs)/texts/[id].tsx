@@ -12,9 +12,11 @@ import { TextContext } from '@/app/_layout';
 import { Text as TextType } from '@/types/data';
 
 export default function Text() {
+
   const { id } = useLocalSearchParams();
-  if (typeof id !== 'string') {
-    throw new Error('Invalid id');
+
+  if (typeof id !== 'undefined' && typeof id !== 'string') {
+    throw new Error(`Unhandled id type: ${id}, typeof ${typeof id}`);
   }
   const textContext = useContext(TextContext);
   const db = useSQLiteContext();
@@ -32,10 +34,7 @@ useEffect(() => {
     if (allRows) {
       setText(allRows);
       setWords(allRows.text?.split(''));
-    } else {
-      console.error('No text found');
-    }
-    
+    } 
   };
   fetchData();
 }, []);
@@ -140,7 +139,7 @@ useEffect(() => {
       </ThemedView>
       <View style={styles.container}>
     <View style={styles.textContainer}>
-      {words ? words.map((word, index) => {
+      {words.length > 0 ? words.map((word, index) => {
         if (word === '\n') {
           return <View key={index} style={{ width: '100%', height: 0 }}></View>;
         } else if (word.match(/\p{Script=Han}/u)) {
