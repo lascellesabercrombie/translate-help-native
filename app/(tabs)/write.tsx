@@ -13,9 +13,12 @@ export default function Write() {
   const db = useSQLiteContext();
   const textContext = useContext(TextContext);
   const selectedTextId = textContext?.selectedTextId;
-  const [textObject, setTextObject] = useState<Partial<TextType> | null>(null);
   const [text, setText] = useState('');
+  const [title, setTitle] = useState('');
+  const [authorId, setAuthorId] = useState(1);
+  const [language, setLanguage] = useState('en');
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  
   function handlePress () {
     setDropdownVisible(!dropdownVisible);
   };
@@ -31,8 +34,10 @@ export default function Write() {
       const allRows: TextType | null = await db.getFirstAsync(
           'SELECT * FROM texts WHERE texts.original_text_id = ?;', [selectedTextId]);
         if (allRows) {
-          setTextObject(allRows);
           setText(allRows.text);
+          setTitle(allRows.title);
+          setAuthorId(allRows.author_id);
+          setLanguage(allRows.language);
       } 
     };
     
@@ -43,26 +48,18 @@ export default function Write() {
     };
   }, [selectedTextId]);
 
-  function handlePressSaveButton () {
+  async function handlePressSaveButton () {
     if (selectedTextId === undefined || selectedTextId === null) {
       throw new Error('No original text id found');
     }
-    setTextObject(prevState => {
-    if (!prevState) return {
-      text: text,
-      original_text_id: selectedTextId,
-    };
-    return {
-      ...prevState,
-      text: text
-    };
-  });
-    let title = textObject?.title || 'title';
-    let author_id = textObject?.author_id || 1;
-    let language = textObject?.language || 'en';
-    db.runAsync(`INSERT INTO texts 
-      (title, author_id, language, text, is_translation, original_text_id) 
-      VALUES (?, ?, ?, ?, ?, ?);`, [title, author_id, language, text, 1, selectedTextId]);
+    try {
+      const result = await db.runAsync(`INSERT INTO texts 
+        (title, author_id, language, text, is_translation, original_text_id) 
+        VALUES (?, ?, ?, ?, ?, ?);`, [title, authorId, language, text, 1, selectedTextId]);
+    } catch {
+      console.error('Failed to save translation');
+    }
+    
   };
 
     return (
@@ -73,6 +70,16 @@ export default function Write() {
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">Write</ThemedText>
         </ThemedView>
+          <TextInput
+          value={title}
+          onChangeText={setTitle}
+          style={styles.textInput}
+          ></TextInput>
+           <TextInput
+          value={language}
+          onChangeText={setLanguage}
+          style={styles.textInput}
+          ></TextInput> 
             <TextInput
             value={text}
             multiline={true}
@@ -109,7 +116,6 @@ headerImage: {
 },
 textInput: {
     color: 'white',
-    height: 200,
     borderColor: 'gray',
     borderWidth: 1,
     padding: 10,
