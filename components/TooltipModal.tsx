@@ -47,7 +47,7 @@ export default function TooltipModal ({
             ) : (
               <FlatList
                 data={definitions}
-                keyExtractor={index => index.toString()}
+                keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => <ThemedText type="definition" numberOfLines={1}>{item}</ThemedText>}
               />
             )}
