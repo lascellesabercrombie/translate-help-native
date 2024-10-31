@@ -21,7 +21,7 @@ export default function Library() {
     
     const fetchData = async () => {
       const allRows = await db.getAllAsync<IndexAuthorTextJoin>(
-        'SELECT texts.id, family_name, personal_name, title FROM authors JOIN texts ON authors.id = texts.author_id;');
+        'SELECT texts.id, family_name, personal_name, title FROM authors JOIN texts ON authors.id = texts.author_id WHERE texts.is_translation = 0;');
       if (mounted) {
         setTexts(allRows);
       }
