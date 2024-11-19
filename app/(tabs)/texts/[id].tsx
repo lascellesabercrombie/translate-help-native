@@ -14,7 +14,6 @@ import { Text as TextType } from '@/types/data';
 export default function Text() {
 
   const { id } = useLocalSearchParams();
-
   if (typeof id !== 'undefined' && typeof id !== 'string') {
     throw new Error(`Unhandled id type: ${id}, typeof ${typeof id}`);
   }
@@ -35,16 +34,12 @@ useEffect(() => {
       setText(allRows);
       setWords(allRows.text?.split(''));
     } 
+    if (id && setSelectedTextId) {
+      setSelectedTextId(parseInt(id));
+    }
   };
   fetchData();
-}, []);
-
-useEffect(() => {
-  if (id && setSelectedTextId) {
-    setSelectedTextId(parseInt(id));
-  }
-}, [id]
-);
+}, [id]);
 
   const [definitions, setDefinitions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
