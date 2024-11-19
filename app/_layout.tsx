@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 import { SQLiteProvider} from 'expo-sqlite';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { migrateDbIfNeeded } from '../assets/databases/db';
-import { Fallback } from './fallback';
+import Fallback from './fallback';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
