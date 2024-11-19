@@ -61,8 +61,7 @@ useEffect(() => {
       if (data.parse && data.parse.wikitext) {
         const wikitext = data.parse.wikitext['*'];
         // take the entry text after ==Chinese== and before any other language sections
-        const sections = wikitext.split("==Chinese==")[1];
-        const chineseSection = sections.split(/\n==[\w]+==\n/)[0]
+        const chineseSection = wikitext.split("==Chinese==")?.[1]?.split(/\n==[\w]+==\n/)[0]
         if (chineseSection) {
           // it looks like single characters get a definition section, while multi-character words get a part of speech section. Current set-up not exhaustive and doesn't properly cover cases (which may exist) where there are multiple parts of speech headings.
           const definitionsSection = chineseSection.split('===Definitions===')[1];
